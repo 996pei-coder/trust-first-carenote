@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+*.db
+*.sqlite3
+.DS_Store
+.env
+tmp/
+output/submission/*.zip
+output/video/*.mp4

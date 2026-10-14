@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ patient.display_name }} · Trust-first CareNote</title>
+  <meta name="description" content="A synthetic, traceable longitudinal Care Note prototype.">
+  <link rel="stylesheet" href="{{ url_for('static', path='/care-note.css') }}">
+</head>
+<body data-user-id="{{ actor.id }}" data-patient-id="{{ patient.id }}">
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Trust-first CareNote <span class="synthetic">Synthetic data</span></p>
+      <h1>{{ patient.display_name }}</h1>
+      <p class="patient-meta">MRN {{ patient.medical_record_number }} · DOB {{ patient.date_of_birth }}</p>
+    </div>
+    <nav class="role-switch" aria-label="Demo role">
+      <span>Viewing as</span>
+      {% for user in users %}
+        <a href="/demo/patients/{{ patient.id }}?as_user={{ user.id }}"
+           class="role-pill {% if user.id == actor.id %}active{% endif %}">
+          {{ user.role.value }}
+        </a>
+      {% endfor %}
+    </nav>
+  </header>
+
+  <main>
+    {% if actor.role.value != 'patient' %}
+      <section class="top-card" aria-labelledby="top-card-title">
+        <div class="top-card-heading">
+          <div>
+            <p class="eyebrow">10-second clinical brief</p>
+            <h2 id="top-card-title">What needs attention now</h2>
+          </div>
+          <div class="trust-summary">
+            <strong>{{ highlights|selectattr('unresolved')|list|length }}</strong> open
+            <span>·</span>
+            <strong>{{ conflicts|length }}</strong> conflicts
+          </div>
+        </div>
+        <div class="highlight-grid">
+          {% for highlight in highlights %}
+            <article class="highlight risk-{{ highlight.risk_level }}">
+              <div class="highlight-meta">
+                <span class="risk-label">{{ highlight.risk_level }}</span>
+                <span>Score {{ highlight.importance_score }}</span>
+                <span>{{ highlight.status }}</span>
+              </div>
+              <h3>{{ highlight.text }}</h3>
+              <p>{{ highlight.risk_reason }}</p>
+              <div class="highlight-actions">
+                <a href="?as_user={{ actor.id }}&source={{ highlight.id }}#entry-{{ highlight.entry_id }}">
+                  View exact source
+                </a>
+                <button data-highlight-action="pin" data-highlight-id="{{ highlight.id }}">Pin</button>
+                <button data-highlight-action="accept" data-highlight-id="{{ highlight.id }}">Accept</button>
+                <button class="quiet" data-highlight-action="reject" data-highlight-id="{{ highlight.id }}">Dismiss</button>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% else %}
+      <section class="patient-card">
+        <p class="eyebrow">Your shared summary</p>
+        <h2>Instructions prepared for you</h2>
+        <p>This view intentionally excludes internal comments and raw AI-generated notes.</p>
+      </section>
+    {% endif %}
+
+    {% if conflicts %}
+      <aside class="conflict-banner">
+        <strong>{{ conflicts|length }} source conflict{% if conflicts|length != 1 %}s{% endif %} need review.</strong>
+        Nothing is silently overwritten; a clinician or admin must confirm the authoritative entry.
+      </aside>
+    {% endif %}
+
+    <div class="workspace-grid">
+      <section class="timeline" aria-labelledby="timeline-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Longitudinal record</p>
+            <h2 id="timeline-title">Timeline</h2>
+          </div>
+          <span>{{ entries|length }} visible entries</span>
+        </div>
+
+        {% for entry in entries %}
+          <article id="entry-{{ entry.id }}" class="timeline-entry {% if source and entry.highlights|selectattr('id', 'equalto', source)|list %}source-focus{% endif %}">
+            <div class="entry-rail"><span></span></div>
+            <div class="entry-body">
+              <div class="entry-header">
+                <div>
+                  <span class="entry-type">{{ entry.entry_type.value|replace('_', ' ') }}</span>
+                  <h3>{{ entry.title }}</h3>
+                </div>
+                <time>{{ entry.occurred_at.strftime('%d %b %Y · %H:%M') }}</time>
+              </div>
+              <p class="entry-content">{{ entry.content }}</p>
+              <div class="entry-footer">
+                <span>{{ entry.author_role.value }}</span>
+                <span>v{{ entry.version }}</span>
+                <code>{{ entry.provenance_pointer }}</code>
+                {% if entry.source_session_id %}<span>Session {{ entry.source_session_id }}</span>{% endif %}
+              </div>
+
+              {% if actor.role.value != 'patient' %}
+                <div class="comments">
+                  {% for comment in comments_by_entry.get(entry.id, []) %}
+                    <div class="comment {% if comment.resolved %}resolved{% endif %}">
+                      <div>
+                        <strong>{{ users_by_id[comment.author_id].display_name }}</strong>
+                        <p>{{ comment.body }}</p>
+                        {% if comment.assigned_to_id %}
+                          <small>Assigned to {{ users_by_id[comment.assigned_to_id].display_name }}</small>
+                        {% endif %}
+                      </div>
+                      <button class="quiet" data-comment-id="{{ comment.id }}" data-resolved="{{ 'false' if comment.resolved else 'true' }}">
+                        {{ 'Reopen' if comment.resolved else 'Resolve' }}
+                      </button>
+                    </div>
+                  {% endfor %}
+                  <form class="comment-form" data-entry-id="{{ entry.id }}">
+                    <input name="body" aria-label="New comment" placeholder="Add internal comment or @mention…" required>
+                    <select name="assigned_to_id" aria-label="Assign comment">
+                      <option value="">No assignee</option>
+                      {% for user in users if user.role.value in ['staff', 'clinician'] %}
+                        <option value="{{ user.id }}">Assign {{ user.display_name }}</option>
+                      {% endfor %}
+                    </select>
+                    <button type="submit">Comment</button>
+                  </form>
+                </div>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </section>
+
+      <aside class="compose-panel">
+        {% if actor.role.value in ['patient', 'staff', 'clinician'] %}
+          <section class="compose-card">
+            <p class="eyebrow">Role-owned update</p>
+            <h2>Add to Care Note</h2>
+            <form id="entry-form" data-entry-type="{{ {'patient':'patient_insight','staff':'staff_note','clinician':'clinician_note'}[actor.role.value] }}">
+              <label>Title<input name="title" required maxlength="180"></label>
+              <label>Section<input name="section_key" value="follow_up" required maxlength="80"></label>
+              <label>Note<textarea name="content" rows="5" required></textarea></label>
+              {% if actor.role.value == 'clinician' %}
+                <label class="check"><input name="patient_visible" type="checkbox"> Patient-facing instruction</label>
+              {% endif %}
+              <button type="submit">Add {{ actor.role.value }} entry</button>
+            </form>
+          </section>
+
+          <section class="compose-card ai-card">
+            <p class="eyebrow">Redact → then AI</p>
+            <h2>Simulate AI scribe</h2>
+            <p>Names, IDs, phones and email addresses are removed before the deterministic AI boundary.</p>
+            <form id="scribe-form" data-interaction-type="{{ {'patient':'ai_patient_session_summary','staff':'ai_nurse_consult_summary','clinician':'ai_doctor_consult_summary'}[actor.role.value] }}">
+              <label>Session ID<input name="session_id" value="demo-{{ actor.role.value }}-session" required></label>
+              <label>Raw synthetic transcript<textarea name="raw_text" rows="5" placeholder="Maya Tan called from +65 9123 4567…" required></textarea></label>
+              <button type="submit">Redact and generate draft</button>
+            </form>
+          </section>
+        {% else %}
+          <section class="compose-card">
+            <p class="eyebrow">Oversight</p>
+            <h2>Admin read-only view</h2>
+            <p>Review clinic-scoped history and audit metadata without authoring clinical content.</p>
+          </section>
+        {% endif %}
+      </aside>
+    </div>
+  </main>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="{{ url_for('static', path='/care-note.js') }}" defer></script>
+</body>
+</html>
+

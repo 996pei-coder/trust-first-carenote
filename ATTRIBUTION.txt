@@ -1,0 +1,39 @@
+TRUST-FIRST CARENOTE - ATTRIBUTION
+==================================
+
+Application dependencies
+------------------------
+FastAPI 0.128.8 - MIT License - https://github.com/fastapi/fastapi
+Jinja2 3.1.6 - BSD-3-Clause License - https://github.com/pallets/jinja
+Pydantic 2.13.4 - MIT License - https://github.com/pydantic/pydantic
+SQLAlchemy 2.0.52 - MIT License - https://github.com/sqlalchemy/sqlalchemy
+Uvicorn 0.39.0 - BSD-3-Clause License - https://github.com/encode/uvicorn
+Starlette 0.49.3 - BSD-3-Clause License - https://github.com/encode/starlette
+
+Test dependencies
+-----------------
+HTTPX 0.28.1 - BSD-3-Clause License - https://github.com/encode/httpx
+pytest 8.4.2 - MIT License - https://github.com/pytest-dev/pytest
+pytest-cov 6.3.0 - MIT License - https://github.com/pytest-dev/pytest-cov
+
+Deliverable generation
+----------------------
+ReportLab 4.4.9 - BSD License - https://www.reportlab.com/opensource/
+Pillow 12.3.0 - MIT-CMU License - https://python-pillow.org/
+Poppler pdftoppm - GPL-2.0-or-later - https://poppler.freedesktop.org/
+
+Models and data
+---------------
+No external AI or machine-learning model is called by the prototype.
+The AI scribe is a deterministic local adapter implemented in this repository.
+All patient, clinic, user, note, and interaction data is fictional and synthetic.
+
+Development assistance
+----------------------
+OpenAI Codex was used for planning, implementation assistance, test generation,
+documentation drafting, and PDF generation. The candidate reviewed the chosen
+scope, architecture, security assumptions, and deliverables.
+
+No external icons, photographs, fonts, datasets, copied UI templates, or audio
+assets are included.
+

@@ -1,0 +1,2 @@
+"""Trust-first CareNote application."""
+
