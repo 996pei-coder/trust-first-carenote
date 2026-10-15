@@ -90,12 +90,6 @@ Each clinic has explainable topic weights rather than an opaque model. Pin adds 
 
 Run `python scripts/benchmark_glance.py --warmup 20 --iterations 300`. The recorded local warm-path result was P95 **2.09 ms**, compared with the 300 ms requirement. See [docs/PERFORMANCE.md](docs/PERFORMANCE.md) for method and limitations.
 
-## Recording and submission staging
-
-With the demo server stopped, run `python scripts/reset_demo_database.py --confirm` to back up the current local database under ignored `tmp/recording-backups/` and restore the deterministic five-entry synthetic seed. Build the code-only archive and candidate bundle with `python scripts/build_submission.py`. The generated ZIP files live under `output/submission/` and are intentionally not committed.
-
 ## Status
 
-Task block 8 has completed the end-to-end demo rehearsal, deterministic recording reset, and reproducible ZIP staging. Video recording and external repository/video links remain candidate-owned final steps. The header-based identity selector remains demo-only; production would replace it with verified session or token authentication while retaining these authorization policies.
-
-See [docs/ACCEPTANCE_MATRIX.md](docs/ACCEPTANCE_MATRIX.md) and [docs/SCOPE.md](docs/SCOPE.md).
+This prototype was built in 72 hours for the Nightingale challenge. Authentication is during the demostration phase, so production use would require verified session or tocken authentication while keeping the same authorization polices.
