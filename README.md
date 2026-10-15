@@ -35,10 +35,6 @@ The primary demo page is `http://127.0.0.1:8000/demo/patients/1?as_user=2`. Use 
 - [Technical brief source](docs/TECHNICAL_BRIEF.md)
 - [Architecture diagram](docs/diagrams/architecture.png)
 - [Data model diagram](docs/diagrams/data-model.png)
-- [Demo recording script](docs/DEMO_SCRIPT.md)
-- [Recording runbook](docs/RECORDING_RUNBOOK.md)
-- [Resume project section](docs/RESUME_PROJECT.md)
-- [Submission checklist](docs/SUBMISSION_CHECKLIST.md)
 - [Attribution and licenses](ATTRIBUTION.txt)
 
 ## Demo identities and RBAC
